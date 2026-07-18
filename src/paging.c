@@ -1,7 +1,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "paging.h"
+#include "pmm.h"
 
+#define _RAM_TOTAL (uintptr_t)0x8000000ULL
 extern void page_flush(uint64_t pte_giga_entry);
 extern uint64_t _end; 
 
@@ -24,9 +26,13 @@ void paging_init_2(void){
   pte_giga_entry[258] = ((uint64_t)pte_mega_entry - 0xFFFFFFC000000000) >> 2 | 0x01;
   uint64_t kernel_kb = (((uint64_t)&_end - 0xFFFFFFC000000000) - 0x80200000)/4096;
   pte_mega_entry[0] = 0x80000000ULL >> 2 | 0xCF;
-  pte_mega_entry[1] = ((uint64_t)pte_kilo_entry - 0xFFFFFFC000000000) >> 2 | 0x01;
-  for(uint64_t i = 0; i < kernel_kb; i++){
-    pte_kilo_entry[i] = (0x80200000ULL + i*4096) >> 2 | 0xCF;
+  //pte_mega_entry[1] = ((uint64_t)pte_kilo_entry - 0xFFFFFFC000000000) >> 2 | 0x01;
+  //for(uint64_t i = 0; i < kernel_kb; i++){
+    //pte_kilo_entry[i] = (0x80200000ULL + i*4096) >> 2 | 0xCF;
+  //}
+  uint64_t kernel_mb = (uint64_t)(_RAM_TOTAL / 0x200000);
+  for(uint64_t i = 0; i < kernel_mb; i++){
+    pte_mega_entry[i] = ((uintptr_t)0x80000000ULL + ((uintptr_t)(0x200000))*i) >> 2 | 0xCF;
   }
 }
 
