@@ -9,7 +9,7 @@ extern uint64_t pte_mega_entry[512];
 extern uint64_t pte_kilo_entry[512];
 void paging_init(void);
 void paging_init_2(void);
-void flush_paging(void);
+void flush_paging(uint64_t page_root);
 #endif // !PAGING_H
 
 

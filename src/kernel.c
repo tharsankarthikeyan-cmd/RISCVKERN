@@ -6,6 +6,7 @@
 #include "paging.h"
 #include "common.h"
 #include "pmm.h"
+#include "create_proc.h"
 
 extern void init_traps(void);
 
@@ -14,15 +15,13 @@ void kmain(void) {
   plic_mmap();
   paging_init_2();
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
-  flush_paging();
-  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
-  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
-  init_traps(); 
+  flush_paging((uint64_t)pte_giga_entry);
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   pmm_init();
-  void* code_is_dead_mismatch = page_alloc(12288);
-  code_is_dead_mismatch = page_alloc(15000);
-  free_pages(code_is_dead_mismatch);
+  init_traps(); 
+  void* new_root_page = create_proc();
+  flush_paging((uint64_t)new_root_page);
+  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
 	while(1) {
 		// Read input from the UART
