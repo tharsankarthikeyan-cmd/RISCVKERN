@@ -7,9 +7,10 @@
 #include "common.h"
 #include "pmm.h"
 #include "create_proc.h"
+#include "proc.h"
 
 extern void init_traps(void);
-
+extern void enter_proc(void* root_page_tab, trapframe_t* tf);
  
 void kmain(void) {
   plic_mmap();
@@ -21,6 +22,10 @@ void kmain(void) {
   init_traps(); 
   void* new_root_page = create_proc();
   flush_paging((uint64_t)new_root_page);
+
+  // Try to init
+  init_proc();
+  enter_proc(init1.root_page_table, init1.tf);
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
 	while(1) {

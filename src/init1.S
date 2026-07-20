@@ -1,0 +1,64 @@
+.global enter_proc
+.extern page_flush
+enter_proc:
+  /* satp */
+  /* make sure that satp entry with proper address is the first entry*/
+  /* subtract 0xFFFFFFC000000000 */
+  mv t0, a0
+  li t1, 0xFFFFFFC000000000
+  sub t0, t0, t1
+  mv a0, t0
+  call page_flush
+
+  /*sscratch entry for trapframe*/
+  csrw sscratch, a1
+  mv t0, a1
+
+  /* set the stack_pointer to trapframe*/
+  mv sp, t0
+  ld t0, 0(sp)
+  ld t1, 8(sp)
+  ld t2, 16(sp)
+  ld t3, 24(sp)
+  ld t4, 32(sp)
+  ld t5, 40(sp)
+  ld t6, 48(sp)
+
+  ld a0, 56(sp)
+  ld a1, 64(sp)
+  ld a2, 72(sp)
+  ld a3, 80(sp)
+  ld a4, 88(sp)
+  ld a5, 96(sp)
+  ld a6, 104(sp)
+  ld a7, 112(sp)
+
+  ld s0, 120(sp)
+  ld s1, 128(sp)
+  ld s2, 136(sp)
+  ld s3, 144(sp)
+  ld s4, 152(sp)
+  ld s5, 160(sp)
+  ld s6, 168(sp)
+  ld s7, 176(sp)
+  ld s8, 184(sp)
+  ld s9, 192(sp)
+  ld s10, 200(sp)
+  ld s11, 208(sp)
+
+  ld ra, 216(sp)
+
+  ld t0, 224(sp)
+  csrw sstatus, t0
+
+  ld t1, 232(sp)          # except_pc (sepc)
+  csrw sepc, t1
+
+  ld tp, 240(sp)          # Thread Pointer
+  ld gp, 248(sp)          # Global Pointer
+
+  ld t2, 256(sp)          # stack_pointer field
+  ld t0, 0(sp)
+  ld t1, 8(sp)
+  mv sp, t2
+  sret
