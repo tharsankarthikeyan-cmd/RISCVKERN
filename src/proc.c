@@ -12,8 +12,14 @@ void init_proc(void){
 
   // STEP 2: Make Special User Process Entries to this table
   // Create a new page for the user process.
-  void* user_prog = page_alloc(4096);
-  ((uint64_t*)init_root_page_table)[0] = ((uintptr_t)user_prog << 2) | 0x11;
+  void* user_prog_mega = page_alloc(4096); // This is for 2MB entry
+  void* user_prog_kilo = page_alloc(4096); // This is for 4KB entry
+  void* store_prog_1 = page_alloc(8192);
+  ((uint64_t*)init_root_page_table)[0] = ((uintptr_t)user_prog_mega >> 2) | 0x01;
+  ((uint64_t*)((uintptr_t)user_prog_mega + (uintptr_t)0xFFFFFFC000000000ULL))[0] = ((uintptr_t)user_prog_kilo >> 2) | 0x01;
+  ((uint64_t*)((uintptr_t)user_prog_kilo + (uintptr_t)0xFFFFFFC000000000ULL))[0] = ((uintptr_t)store_prog_1 >> 2) | 0x1F;
+  store_prog_1 += 4096;
+  ((uint64_t*)((uintptr_t)user_prog_kilo + (uintptr_t)0xFFFFFFC000000000ULL))[1] = ((uintptr_t)store_prog_1 >> 2) | 0x1F;
 
   // STEP 3: Create a new trapframe and Kernel Stack
   void* k_stack = page_alloc(4096);
@@ -35,7 +41,7 @@ void init_proc(void){
   }
   init_trap_frame->except_pc = 0x1000;
   init_trap_frame->ret_addr = 0;
-  init_trap_frame->s_stat = 0x20;
+  init_trap_frame->s_stat = 0x40020;
 
   // Enter the entries into the Proc Struct
   init1.pid = 0;

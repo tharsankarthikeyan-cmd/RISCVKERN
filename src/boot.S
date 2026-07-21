@@ -93,4 +93,14 @@ early_kernel_main:
   tail kmain
 
 	.cfi_endproc
+
+.section .rodata
+.align 4
+.global user_prog_start
+.global user_prog_end
+
+user_prog_start:
+  .incbin "user_prog/prog1.bin"
+user_prog_end:
+
 .end

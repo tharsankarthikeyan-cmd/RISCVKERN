@@ -1,5 +1,8 @@
 .global enter_proc
 .extern page_flush
+.extern mem_cpy
+.extern user_prog_start
+.extern user_prog_end
 enter_proc:
   /* satp */
   /* make sure that satp entry with proper address is the first entry*/
@@ -14,7 +17,22 @@ enter_proc:
   csrw sscratch, a1
   mv t0, a1
 
+  /*Allow Kernel Mem Access*/
+  li t1, 0x40020
+  csrw sstatus, t1
+
+  /*memcpy the program*/
+  li t0, 0x1000
+  la t1, user_prog_start
+  la t2, user_prog_end
+  sub t3, t2, t1
+  mv a0, t0
+  mv a1, t1
+  mv a2, t3
+  call mem_cpy
+
   /* set the stack_pointer to trapframe*/
+  csrr t0, sscratch
   mv sp, t0
   ld t0, 0(sp)
   ld t1, 8(sp)

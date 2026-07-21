@@ -8,6 +8,7 @@
 #include "pmm.h"
 #include "create_proc.h"
 #include "proc.h"
+#include "mem_cpy.h"
 
 extern void init_traps(void);
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
@@ -20,8 +21,8 @@ void kmain(void) {
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   pmm_init();
   init_traps(); 
-  void* new_root_page = create_proc();
-  flush_paging((uint64_t)new_root_page);
+  //void* new_root_page = create_proc();
+  //flush_paging((uint64_t)new_root_page);
 
   // Try to init
   init_proc();
