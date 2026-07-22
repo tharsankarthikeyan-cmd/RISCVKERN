@@ -1,14 +1,54 @@
-#include <stddef.h>
-#include <stdint.h>
-#include "common.h"
-#include "pmm.h"
+# Dynamic Memory Allocation in Operating Systems
+There are some very essential dynamics memory allocation algorithms in Operating System for Memory and Free Space Management, Given below are some of the very important algorithms
 
+- Page Frame Allocator 
+- SLUB/SLAB Allocator
+- Virtual Memory Allocator
 
-//extern uint64_t is_alloc_bitmap[];
-//extern uint64_t is_contigious_bitmap[];
+Within Page Frame Allocator there are two very essential algorithms which are implemented across hobby operating system
 
+- Bitmap Allocator
+- Buddy Allocator
+
+## Bitmap Allocator
+Page Frame allocator are allocator which allocate pages based on the given amount required and mark them as used. They must not allocate a page already allocated and not yet freed by the Operating System or Process, Furthermore, They generally allocate pages in the form of 4KB pages, In our own Hobby Operating System, We have made a page frame allocator using the Bitmap System
+
+A bitmap system is significantly easier and has less metadata and memory overhead, but the main disadvantage of this system is the O(N), worst case scenario search algorithm
+In the bitmap system each page is represented by a single bit.
+For eg.
+In an normal RISC V system with 128MB of RAM
+```text
+_mmio_start = 0x00000000
+_ram_start = 0x80000000 (2GB)
+_kernel_start = 0x80200000 (2GB + 2MB)
+_kernel_end = somewhere between _ram_end and _kernel_start
+_ram_end = 0x88000000 (128MB + 2GB)
+```
+
+The 2MB is used for OpenSBI and The rest of the memory about 0x80000000 is used for MMIO
+We must divide the entire RAM space from start to end into 4KB pages and create a Bitmap storing all of it
+```text
+Total RAM = 0x88000000 - 0x80000000 = 0x8000000 (128MB)
+Total 4KB Pages = 0x8000000(128MB) / 4096(4KB) = 32,768 Page Available
+No of 64-bit Integers = floor(32,768 / 64) = 512 (64 bit Entries)
+```
+
+For each of those 512 Pages We store a single bit storing whether the Page is Allocated or Free.
+Furthermore, When allocation we must implement an algorithm to allocate pages contiguously
+Hence we would create another 512*64 bit entry to store the state of the page, where contiguous or not.
+Now we have two arrays
+```c
+uint64_t is_page_alloc[512];
+uint64_t is_page_contigious[512];
+```
+Now we must create an algorithm which is used to Allocate and Mark the Pages as Allocated or Contiguous
+In RISC V System we have a bit manipulation extension which has proved useful in this scenario called ctz or Count Trailing Zeroes
+Hence we would use that algorithm here, but if in case the Board does not come with the ctz extension we must implement our own ctz in order to get the allocator working.
+
+Firstly we must be able to allocate a number of pages for the already existing kernel based on the linker symbol _end, which is at a higher address after Higher Half Kernel Paging 
+```c
+// Calculate the Number of Pages Required for the kernel
 extern uint64_t _end;
-
 #define _RAM_START (uintptr_t)0x80000000ULL
 #define _TOTAL_RAM (uintptr_t)0x8000000ULL
 #define _RAM_END (_RAM_START + _TOTAL_RAM)
@@ -16,9 +56,10 @@ extern uint64_t _end;
 #define _USABLE_RAM (_TOTAL_RAM - ((_END - (uintptr_t)0xFFFFFFC000000000ULL) - _RAM_START)) 
 #define _TOTAL_PAGES _TOTAL_RAM/4096
 #define _TOTAL_BITMAP_64 ((_TOTAL_PAGES+63)/64)
-uint64_t is_alloc_bitmap[_TOTAL_BITMAP_64];
-uint64_t is_contigious_bitmap[_TOTAL_BITMAP_64];
+// Given above are some definitions regarding the kernel and RAM
+// _END is the most important because this is where the kernel ends
 
+// GIVEN BELOW IS THE FUNCTION WHICH HANDLES INITIALIZATION
 void pmm_init(void){
   // Find the amount of the pages allocated for the kernel
   uint64_t k_occupied = (_TOTAL_RAM - _USABLE_RAM)/4096;
@@ -40,7 +81,21 @@ void pmm_init(void){
   k_occupied_remainder -= 1;
   is_contigious_bitmap[k_occupied_bitmaps] = (1ULL << k_occupied_remainder) - 1;
 }
+```
+A common pattern that you note here is
+```text
+(1ULL << Variable) - 1;
+For eg if we want a bitmap of three 111's like this
+then we perform
+1ULL << 3 which gives 1000
+Subtracting one from it means 111, hence we do that
+Further we can shift 111 << variable to reach the desired position based on the address
+```
 
+The Given above function makes the entries of the kernel are allocated, Which means the main Function does not search for the bits in the kernel space
+Now we create a function which helps us figure out and return an address of free pages based on number of bytes requested for
+The function for such is heavily documented and written below
+```c
 void* page_alloc(uint64_t bytes){
   // Find out the number of pages required by dividing by 4KB;
   uint64_t k_occupied = (_TOTAL_RAM - _USABLE_RAM)/4096;
@@ -108,9 +163,10 @@ void* page_alloc(uint64_t bytes){
   // If page is found, then return 0x0;
   return (void*)(0);
 }
+```
 
-
-
+Further more we require a short algorithm for free as well
+```c
 // Free Pages
 void free_pages(void* ptr){
   // Given Pointer Converted to uintptr_t for arithmetic
@@ -141,3 +197,5 @@ void free_pages(void* ptr){
   is_alloc_bitmap[bitmap_index] = is_alloc_bitmap[bitmap_index] & mask_pages;
   is_contigious_bitmap[bitmap_index] = is_contigious_bitmap[bitmap_index] & mask_pages;
 }
+```
+With this our basic bitmap allocator is complete

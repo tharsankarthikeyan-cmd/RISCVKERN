@@ -34,7 +34,7 @@ Each 4KB is a single Page
 - In all the 64 bit systems, We never use 64 bit addresses we only use 56 bit addresses which is more preffered
 - Let's now see how the Virtual and Physical Address correspond with each other
 > [!IMPORTANT]
-> It is very important to notes that inn 64 bits system we use the so called 512 Multiplier system instead of 1024 Multiplier
+> It is very important to notes that in 64 bits system we use the so called 512 Multiplier system instead of 1024 Multiplier
 
 - Let's begin with page offsets: A page must be 4KB meaning, 4096 bytes, Hence similar to the 32 bit system we take LSB 12 bits for Page Offset
 - 512 * 4KB pages make us a Page Table (Level 0) which gives us, 2^9*4Kb pages leading us to 2MB
@@ -43,7 +43,7 @@ Each 4KB is a single Page
 - Similarly we also allot 9 bits for the next Page Table (Level 1) which consists of 512 * 2MB = 2^9 * 2MB = 1GB
 - Page Table Entries of Level 1 Now correspond to 1GB Mega Pages consisting of 512, 2MB Huge Pages
 - Furthermore we again allot the next 9 bits towards Page Table (Level 2) which consists of 512 * 1GB = 512 GB.
-- Now almost the entire stuff is Covered
+- Now almost the entire address space is Covered
 - This is the Sv39, Three Level Paging Protocol
 - We have now accommodated for the 9+9+9+12 = 39 bits of the Virtual Address
 - How is the Physical Address Structured
