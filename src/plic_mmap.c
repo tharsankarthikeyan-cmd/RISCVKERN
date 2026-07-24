@@ -6,4 +6,5 @@ void plic_mmap(void){
   *PLIC_SOURCE_10_PRIORITY = 1;
   *PLIC_ENABLE_CTX_1 = 0x400;
   *PLIC_THERSHOLD = 0;
+  asm volatile("fence i, r" ::: "memory");
 }

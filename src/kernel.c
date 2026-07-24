@@ -24,11 +24,11 @@ void kmain(void) {
   //void* new_root_page = create_proc();
   //flush_paging((uint64_t)new_root_page);
 
+  ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
   // Try to init
   init_proc();
   enter_proc(init1.root_page_table, init1.tf);
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
-  ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
 	while(1) {
 		// Read input from the UART
     asm volatile("wfi");

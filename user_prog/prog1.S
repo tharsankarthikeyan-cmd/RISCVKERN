@@ -3,6 +3,5 @@
 .global _start
 
 li t1, 0xdeadc0de
-ecall
 _start:
     j _start    # Jump to the '_start' label infinitely

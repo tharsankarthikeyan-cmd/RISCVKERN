@@ -1,3 +1,4 @@
+#include "../include/plic_mmap.h"
 .extern handler_function
 
 .section .text
@@ -50,7 +51,7 @@ user_proc_interrupt:
   sd s11, 208(sp)
   sd ra, 216(sp)
 
-  # FOR CSR's
+  # FOR CSR
   csrr t0, sstatus
   andi t0, t0, -3
   sd t0, 224(sp)
@@ -62,8 +63,8 @@ user_proc_interrupt:
   csrr t0, sscratch
   sd t0, 256(sp)
 
-  # SET sstatus to zero for further Interrupts
-  csrw sstatus, x0
+  # SET sscratch to zero for further Interrupts
+  csrw sscratch, x0
 
   # Enable Interrupts Safely
   csrsi sstatus, 2
@@ -107,6 +108,16 @@ user_proc_interrupt:
   csrw sepc, t0
   ld tp, 240(sp)
   ld gp, 248(sp)
+
+# CLAIM COMPLETE CYCLE.
+  li t0, 0xFFFFFFC000000000
+  li t1, 0x0C201004
+  add t0, t0, t1
+  lw t1, 0(t0)
+  sw t1, 0(t0)
+
+  ld t0, 0(sp)
+  ld t1, 8(sp)
   csrw sscratch, sp
   ld sp, 256(sp)
   sret
