@@ -17,8 +17,7 @@ user_proc_interrupt:
   # Swap once more to take care of sscratch
   csrrw t0, sscratch, t0
 
-  #Disable Interrupts
-  csrci sstatus, 2
+# Interrupts are already disabled
 
   # Swap SSCRATCH and SP
   csrrw sp, sscratch, sp
@@ -53,7 +52,6 @@ user_proc_interrupt:
 
   # FOR CSR
   csrr t0, sstatus
-  andi t0, t0, -3
   sd t0, 224(sp)
   csrr t0, sepc
   addi t0, t0, 4
@@ -71,6 +69,9 @@ user_proc_interrupt:
 
   csrr a0, scause
   call handler_function
+
+  # Disable Interrupts Safely
+  csrci sstatus, 2
 
   ld t0, 0(sp)
   ld t1, 8(sp)
@@ -110,11 +111,11 @@ user_proc_interrupt:
   ld gp, 248(sp)
 
 # CLAIM COMPLETE CYCLE.
-  li t0, 0xFFFFFFC000000000
-  li t1, 0x0C201004
-  add t0, t0, t1
-  lw t1, 0(t0)
-  sw t1, 0(t0)
+  #li t0, 0xFFFFFFC000000000
+  #li t1, 0x0C201004
+  #add t0, t0, t1
+  #lw t1, 0(t0)
+  #sw t1, 0(t0)
 
   ld t0, 0(sp)
   ld t1, 8(sp)

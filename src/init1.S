@@ -19,7 +19,9 @@ enter_proc:
   mv t0, a1
 
   /*Allow Kernel Mem Access*/
-  li t1, 0x40020
+  /* Turn on SUM bit */
+  /* Turn on SPIE bit */
+  li t1, 0x40022
   csrw sstatus, t1
 
   /*memcpy the program*/
@@ -33,6 +35,10 @@ enter_proc:
   call mem_cpy
 
   /* set the stack_pointer to trapframe*/
+  /* Make sure to turn interrupts off */
+  csrci sstatus, 2
+
+  /*Base of trapframe_t*/
   csrr t0, sscratch
   mv sp, t0
   ld t0, 0(sp)
@@ -77,11 +83,11 @@ enter_proc:
   ld gp, 248(sp)          # Global Pointer
 
   # CLAIM/COMPLETE SAFETY CHECK
-  li t0, 0xFFFFFFC000000000
-  li t1, 0x0C201004
-  add t0, t0, t1
-  lw t1, 0(t0)
-  sw t1, 0(t0)
+  # li t0, 0xFFFFFFC000000000
+  # li t1, 0x0C201004
+  # add t0, t0, t1
+  # lw t1, 0(t0)
+  # sw t1, 0(t0)
 
   ld t2, 256(sp)          # stack_pointer field
   ld t0, 0(sp)
