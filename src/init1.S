@@ -15,8 +15,7 @@ enter_proc:
   call page_flush
 
   /*sscratch entry for trapframe*/
-  csrw sscratch, a1
-  mv t0, a1
+  mv t4, a1
 
   /*Allow Kernel Mem Access*/
   /* Turn on SUM bit */
@@ -37,6 +36,9 @@ enter_proc:
   /* set the stack_pointer to trapframe*/
   /* Make sure to turn interrupts off */
   csrci sstatus, 2
+  
+  /*Write to sscratch after interrupts are disabled*/
+  csrw sscratch, t4
 
   /*Base of trapframe_t*/
   csrr t0, sscratch

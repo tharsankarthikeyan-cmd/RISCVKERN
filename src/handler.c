@@ -3,9 +3,14 @@
 #include "debug.h"
 #include "plic_mmap.h"
 #include "handler.h"
+#include "timer.h"
 
 void handler_function(uint64_t scause_reg){
   if(scause_reg == 8){
+    ecall_print((uint8_t*)"El Psy Kongroo", 14);
+  }
+  if(scause_reg == 5){
+    ecall_timer_set();
     ecall_print((uint8_t*)"El Psy Kongroo", 14);
   }
   else {
