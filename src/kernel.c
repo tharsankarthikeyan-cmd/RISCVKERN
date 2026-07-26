@@ -21,8 +21,8 @@ void kmain(void) {
   flush_paging((uint64_t)pte_giga_entry);
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   pmm_init();
+  //ecall_timer_set();
   init_traps();
-  ecall_timer_set();
   //void* new_root_page = create_proc();
   //flush_paging((uint64_t)new_root_page);
 
