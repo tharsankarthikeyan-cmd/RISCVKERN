@@ -25,8 +25,8 @@ enter_proc:
 
   /*memcpy the program*/
   li t0, 0x1000
-  la t1, user_prog_start
-  la t2, user_prog_end
+  mv t1, a2
+  mv t2, a3
   sub t3, t2, t1
   mv a0, t0
   mv a1, t1

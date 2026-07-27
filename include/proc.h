@@ -19,11 +19,12 @@ typedef struct Proc{
   uint8_t pid;
   void* root_page_table;
   trapframe_t* tf;
+  struct Proc* next;
 }__attribute__((packed)) Proc;
 
 extern Proc init1;
 
-void init_proc(void);
+void init_proc(Proc* end_proc, Proc* current_proc, void* prog_address_start, void* prog_address_end, bool is_init);
 
 
 #endif // !PROC_H

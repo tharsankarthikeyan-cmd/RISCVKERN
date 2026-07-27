@@ -4,9 +4,12 @@
 #include "pmm.h"
 #include "paging.h"
 #include "create_proc.h"
+#include "mem_cpy.h"
 
-Proc init1;
-void init_proc(void){
+extern void enter_proc(void* root_page_tab, trapframe_t* tf, void* prog_address_start, void* prog_address_end);
+
+//Proc init1;
+void init_proc(Proc* end_proc, Proc* current_proc, void* prog_address_start, void* prog_address_end, bool is_init){
   // STEP 1: Create a new page for the root page table and copy the the kernel page table;
   void* init_root_page_table = copy_page_data((void*)pte_giga_entry);
 
@@ -44,7 +47,51 @@ void init_proc(void){
   init_trap_frame->s_stat = 0x40020;
 
   // Enter the entries into the Proc Struct
-  init1.pid = 0;
-  init1.root_page_table = init_root_page_table;
-  init1.tf = init_trap_frame;
+  //init1.pid = 0;
+  //init1.root_page_table = init_root_page_table;
+  //init1.tf = init_trap_frame;
+  Proc* process;
+  if(is_init){
+    process = (Proc*)(end_proc);
+  }
+  else{
+    process = (Proc*)((uintptr_t)(end_proc) + sizeof(Proc));
+  }
+  process->pid = 0;
+  process->root_page_table = init_root_page_table;
+  process->tf = init_trap_frame;
+  process->next = (Proc*)(end_proc->next);
+  end_proc->next = (Proc*)process;
+
+  // Save the current processes tables
+  void* prev_page_tab = current_proc->root_page_table;
+  
+  // Flush the New Processes Table.
+  flush_paging((uint64_t)process->root_page_table);
+  
+  // Allow User Access
+  //   li t1, 0x40022
+  //   csrw sstatus, t1
+  __asm__ __volatile__(
+    "li t1, 0x40022\n\t"
+    "csrw sstatus, t1\n\t"
+    :
+    :
+    :"t1"
+  );
+
+
+  // We load the Program and Keep
+  size_t prog_size = (size_t)((uintptr_t)prog_address_end - (uintptr_t)prog_address_start);
+  mem_cpy((void*)0x1000,prog_address_start,prog_size);
+
+  if(is_init){
+    flush_paging((uint64_t)pte_giga_entry);
+  }
+  else{
+  // Reflush the current proc tables
+  flush_paging((uint64_t)current_proc->root_page_table);
+  }
+  // Loading and Entering the Process.
+  //enter_proc(process->root_page_table, process->tf, prog_address_start, prog_address_end);
 }
