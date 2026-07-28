@@ -98,9 +98,12 @@ early_kernel_main:
 .align 4
 .global user_prog_start
 .global user_prog_end
+.global user_prog_end_2
 
 user_prog_start:
   .incbin "user_prog/prog1.bin"
 user_prog_end:
+  .incbin "user_prog/prog2.bin"
+user_prog_end_2:
 
 .end

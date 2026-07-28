@@ -15,6 +15,7 @@ extern void init_traps(void);
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_start[];
 extern uint8_t user_prog_end[];
+extern uint8_t user_prog_end_2[];
 
 Proc* proc_list;
 Proc* end_proc;
@@ -28,7 +29,7 @@ void kmain(void) {
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
   pmm_init();
   //ecall_timer_set();
-  init_traps();
+  //init_traps();
   //void* new_root_page = create_proc();
   //flush_paging((uint64_t)new_root_page);
   
@@ -43,7 +44,8 @@ void kmain(void) {
 
   // Try to init
   init_proc(end_proc,current_proc,(void*)user_prog_start,(void*)user_prog_end,true);
-  init_proc(end_proc,current_proc,(void*)user_prog_start,(void*)user_prog_end,false);
+  init_proc(end_proc,current_proc,(void*)user_prog_end,(void*)user_prog_end_2,false);
+  init_traps();
   //enter_proc(init1.root_page_table, init1.tf);
   ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
 	while(1) {

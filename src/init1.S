@@ -24,14 +24,14 @@ enter_proc:
   csrw sstatus, t1
 
   /*memcpy the program*/
-  li t0, 0x1000
+  /*li t0, 0x1000
   mv t1, a2
   mv t2, a3
   sub t3, t2, t1
   mv a0, t0
   mv a1, t1
   mv a2, t3
-  call mem_cpy
+  call mem_cpy*/
 
   /* set the stack_pointer to trapframe*/
   /* Make sure to turn interrupts off */

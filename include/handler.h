@@ -4,6 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void handler_function(uint64_t scause_reg);
+void handler_function(uint64_t scause_reg,uint64_t prog_id);
 
 #endif // !
