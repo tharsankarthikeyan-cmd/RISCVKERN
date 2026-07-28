@@ -14,13 +14,18 @@ extern uint8_t user_prog_end[];
 void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
   if(scause_reg == 8){
     if(prog_id == 0xdeadbeef){
-      ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);
+      uint8_t process_string[17] = "\033[ ; HProcess  : ";
+      ecall_print((uint8_t*)"\033[0;0HProcess 0: ", 17);
       uint8_t count[6] = {'0','0','0','0','0','\r'};
       uart_int(value,count,5);
       ecall_print((uint8_t*)count,5);
     }
     else if(prog_id == 0xdeadc0de){
-      ecall_print((uint8_t*)"\033[2;0HProcess 2: ", 17);
+      uint8_t process_string[17] = "\033[ ; HProcess  : ";
+      process_string[2] = '0' + 2*(current_proc->pid);
+      process_string[4] = '0';
+      process_string[14] = '0' + current_proc->pid;
+      ecall_print((uint8_t*)process_string, 17);
       uint8_t count[6] = {'0','0','0','0','0','\r'};
       uart_int(value,count,5);
       ecall_print((uint8_t*)count,5);
@@ -41,7 +46,6 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
       uint8_t char_t = *(volatile uint8_t*)(0x10000000+0xFFFFFFC000000000);
       uint8_t char_addr[1] = {char_t};
       if(char_addr[0] == 'X' || char_addr[0] == 'x'){
-        ecall_print((uint8_t*)"AA",2);
         init_proc(user_prog_start,user_prog_end,false);
       }
       else{

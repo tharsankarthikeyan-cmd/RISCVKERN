@@ -58,7 +58,7 @@ void init_proc(void* prog_address_start, void* prog_address_end, bool is_init){
   else{
     process = (Proc*)((uintptr_t)(end_proc) + sizeof(Proc));
   }
-  process->pid = 0;
+  process->pid = end_proc->pid + 1;
   process->root_page_table = init_root_page_table;
   process->tf = init_trap_frame;
   process->next = (Proc*)(end_proc->next);
