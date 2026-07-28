@@ -24,9 +24,9 @@ Proc* current_proc;
 void kmain(void) {
   plic_mmap();
   paging_init_2();
-  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
+  ecall_print((uint8_t*)"\033[2J", 4);
   flush_paging((uint64_t)pte_giga_entry);
-  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
+  ecall_print((uint8_t*)"\033[?25l",6);
   pmm_init();
   //ecall_timer_set();
   //init_traps();
@@ -47,7 +47,7 @@ void kmain(void) {
   init_proc(end_proc,current_proc,(void*)user_prog_end,(void*)user_prog_end_2,false);
   init_traps();
   //enter_proc(init1.root_page_table, init1.tf);
-  ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
+  //ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
 	while(1) {
 		// Read input from the UART
     asm volatile("wfi");

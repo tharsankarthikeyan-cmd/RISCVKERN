@@ -9,13 +9,19 @@
 
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 
-void handler_function(uint64_t scause_reg,uint64_t prog_id){
+void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
   if(scause_reg == 8){
     if(prog_id == 0xdeadbeef){
-      ecall_print((uint8_t*)"Celeb17", 7);
+      ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);
+      uint8_t count[6] = {'0','0','0','0','0','\r'};
+      uart_int(value,count,5);
+      ecall_print((uint8_t*)count,5);
     }
     else if(prog_id == 0xdeadc0de){
-      ecall_print((uint8_t*)"El Psy Kongroo", 14);
+      ecall_print((uint8_t*)"\033[2;0HProcess 2: ", 17);
+      uint8_t count[6] = {'0','0','0','0','0','\r'};
+      uart_int(value,count,5);
+      ecall_print((uint8_t*)count,5);
     }
   }
   if((scause_reg & 0xF) == 5){

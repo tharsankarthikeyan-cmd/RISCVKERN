@@ -16,3 +16,16 @@ uint64_t ecall_print(uint8_t line[], uint64_t len){
   );
   return a0;
 }
+
+void uart_int(uint64_t number,uint8_t vga_str[],uint8_t size){
+  uint8_t i = 0;
+  for(i = 0; i < size; i++){
+    vga_str[i] = '0';
+  }
+  i -= 1;
+  while(number > 0){
+    vga_str[i] = '0' + number%10;
+    number = number / 10;
+    i--;
+  }
+}
