@@ -8,6 +8,8 @@
 #include "timer.h"
 
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
+extern uint8_t user_prog_start[];
+extern uint8_t user_prog_end[];
 
 void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
   if(scause_reg == 8){
@@ -38,7 +40,13 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
     if(claim == 10){
       uint8_t char_t = *(volatile uint8_t*)(0x10000000+0xFFFFFFC000000000);
       uint8_t char_addr[1] = {char_t};
-      ecall_print((uint8_t*)char_addr,1);
+      if(char_addr[0] == 'X' || char_addr[0] == 'x'){
+        ecall_print((uint8_t*)"AA",2);
+        init_proc(user_prog_start,user_prog_end,false);
+      }
+      else{
+        ecall_print((uint8_t*)char_addr,1);
+      }
       //*(volatile uint8_t*)(0x10000000) = char_t;
     }
     *write_ptr = claim;

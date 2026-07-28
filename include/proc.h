@@ -24,7 +24,7 @@ typedef struct Proc{
 
 extern Proc init1;
 
-void init_proc(Proc* end_proc, Proc* current_proc, void* prog_address_start, void* prog_address_end, bool is_init);
+void init_proc(void* prog_address_start, void* prog_address_end, bool is_init);
 
 
 #endif // !PROC_H

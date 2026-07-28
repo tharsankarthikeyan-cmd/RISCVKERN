@@ -43,8 +43,8 @@ void kmain(void) {
   ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
 
   // Try to init
-  init_proc(end_proc,current_proc,(void*)user_prog_start,(void*)user_prog_end,true);
-  init_proc(end_proc,current_proc,(void*)user_prog_end,(void*)user_prog_end_2,false);
+  init_proc((void*)user_prog_start,(void*)user_prog_end,true);
+  init_proc((void*)user_prog_end,(void*)user_prog_end_2,false);
   init_traps();
   //enter_proc(init1.root_page_table, init1.tf);
   //ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);

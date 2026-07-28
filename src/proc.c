@@ -5,11 +5,12 @@
 #include "paging.h"
 #include "create_proc.h"
 #include "mem_cpy.h"
+#include "common.h"
 
 extern void enter_proc(void* root_page_tab, trapframe_t* tf, void* prog_address_start, void* prog_address_end);
 
 //Proc init1;
-void init_proc(Proc* end_proc, Proc* current_proc, void* prog_address_start, void* prog_address_end, bool is_init){
+void init_proc(void* prog_address_start, void* prog_address_end, bool is_init){
   // STEP 1: Create a new page for the root page table and copy the the kernel page table;
   void* init_root_page_table = copy_page_data((void*)pte_giga_entry);
 
@@ -62,6 +63,7 @@ void init_proc(Proc* end_proc, Proc* current_proc, void* prog_address_start, voi
   process->tf = init_trap_frame;
   process->next = (Proc*)(end_proc->next);
   end_proc->next = (Proc*)process;
+  end_proc = (Proc*)process;
 
   // Save the current processes tables
   void* prev_page_tab = current_proc->root_page_table;
