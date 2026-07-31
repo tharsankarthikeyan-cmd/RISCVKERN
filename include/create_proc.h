@@ -6,7 +6,7 @@
 
 void* create_proc(void);
 void* copy_page_data(void* page_entry_addr);
-
+void delete_page_tables(void* page_entry_addr);
 
 #endif // !CREATE_PROC_H
 

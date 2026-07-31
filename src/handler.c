@@ -4,6 +4,7 @@
 #include "plic_mmap.h"
 #include "handler.h"
 #include "proc.h"
+#include "create_proc.h"
 #include "common.h"
 #include "timer.h"
 
@@ -15,7 +16,7 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
   if(scause_reg == 8){
     if(prog_id == 0xdeadbeef){
       uint8_t process_string[17] = "\033[ ; HProcess  : ";
-      ecall_print((uint8_t*)"\033[0;0HProcess 0: ", 17);
+      ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);
       uint8_t count[6] = {'0','0','0','0','0','\r'};
       uart_int(value,count,5);
       ecall_print((uint8_t*)count,5);
@@ -47,6 +48,15 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
       uint8_t char_addr[1] = {char_t};
       if(char_addr[0] == 'X' || char_addr[0] == 'x'){
         init_proc(user_prog_start,user_prog_end,false);
+      }
+      else if(char_addr[0] == 'k'){
+        void* current_proc_tables = (void*)((uintptr_t)current_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL);
+        delete_page_tables(current_proc_tables);
+        Proc* traverse = current_proc;
+        while((void*)traverse->next != (void*)current_proc){
+          traverse = traverse->next;
+        }
+        traverse->next = current_proc->next;
       }
       else{
         ecall_print((uint8_t*)char_addr,1);

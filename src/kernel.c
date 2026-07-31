@@ -45,6 +45,7 @@ void kmain(void) {
   // Try to init
   init_proc((void*)user_prog_start,(void*)user_prog_end,true);
   init_proc((void*)user_prog_end,(void*)user_prog_end_2,false);
+  //delete_page_tables((void*)((uintptr_t)end_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL));
   init_traps();
   //enter_proc(init1.root_page_table, init1.tf);
   //ecall_print((uint8_t*)"El Psy Kongroo\r\n", 14);
