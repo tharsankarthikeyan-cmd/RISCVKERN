@@ -12,8 +12,19 @@ extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_start[];
 extern uint8_t user_prog_end[];
 
-void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value){
+void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uint64_t trapframe_reg){
   if(scause_reg == 8){
+    
+    // If the Exception is an ecall add 4 bytes to SEPC and then push tio 232(sp)
+    __asm__ __volatile__(
+      "csrr t0, sepc\n\t"
+      "addi t0, t0, 4\n\t"
+      "sd t0, 232(%0)\n\t"
+      :
+      :"r"(trapframe_reg)
+      :"t0","memory"
+    );
+
     if(prog_id == 0xdeadbeef){
       uint8_t process_string[17] = "\033[ ; HProcess  : ";
       ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);

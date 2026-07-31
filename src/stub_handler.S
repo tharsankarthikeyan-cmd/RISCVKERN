@@ -53,14 +53,16 @@ user_proc_interrupt:
   # FOR CSR
   csrr t0, sstatus
   sd t0, 224(sp)
-  csrr t0, sepc
-  addi t0, t0, 4
-  sd t0, 232(sp)
+  #csrr t0, sepc
+  #addi t0, t0, 4
+  #sd t0, 232(sp)
   sd tp, 240(sp)
   sd gp, 248(sp)
   csrr t0, sscratch
   sd t0, 256(sp)
-
+  
+  # Store sscrtach
+  mv a3, sp 
   # SET sscratch to zero for further Interrupts
   csrw sscratch, x0
 
