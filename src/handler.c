@@ -43,13 +43,23 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
       ecall_print((uint8_t*)count,5);
     }
   }
-  if((scause_reg & 0xF) == 5){
+  else if((scause_reg & 0xF) == 5){
     ecall_timer_set();
     //ecall_print((uint8_t*)"El Psy Kongroo", 14);
     current_proc = current_proc->next;
     void* root_page_tab = current_proc->root_page_table;
     trapframe_t* tf = current_proc->tf;
     enter_proc(root_page_tab, tf);
+  }
+  else if(scause_reg == 13 || scause_reg == 12 || scause_reg == 15){
+    void* stval_reg;
+    __asm__ __volatile__(
+      "csrr %0, stval\n\t"
+      :"=r"(stval_reg)
+      :
+      :
+    );
+    demand_paging(current_proc->root_page_table,stval_reg);
   }
   else {
     uint32_t* write_ptr = (uint32_t*)((uintptr_t)PLIC_CLAIM_COMPLETE + 0xFFFFFFC000000000);
