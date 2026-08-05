@@ -20,6 +20,7 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
       "csrr t0, sepc\n\t"
       "addi t0, t0, 4\n\t"
       "sd t0, 232(%0)\n\t"
+      "csrsi sstatus, 2\n\t"
       :
       :"r"(trapframe_reg)
       :"t0","memory"
@@ -52,6 +53,15 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
     enter_proc(root_page_tab, tf);
   }
   else if(scause_reg == 13 || scause_reg == 12 || scause_reg == 15){
+    // Make sure to save the SEPC
+    __asm__ __volatile__(
+      "csrr t0, sepc\n\t"
+      "sd t0, 232(%0)\n\t"
+      "csrsi sstatus, 2\n\t"
+      :
+      :"r"(trapframe_reg)
+      :"t0","memory"
+    );
     void* stval_reg;
     __asm__ __volatile__(
       "csrr %0, stval\n\t"
@@ -62,8 +72,17 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
     demand_paging(current_proc->root_page_table,stval_reg);
   }
   else {
+    __asm__ __volatile__(
+      "csrr t0, sepc\n\t"
+      "sd t0, 232(%0)\n\t"
+      "csrsi sstatus, 2\n\t"
+      :
+      :"r"(trapframe_reg)
+      :"t0","memory"
+    );
     uint32_t* write_ptr = (uint32_t*)((uintptr_t)PLIC_CLAIM_COMPLETE + 0xFFFFFFC000000000);
     uint32_t claim = *write_ptr;
+    // Make sure to save the SEPC
     if(claim == 10){
       uint8_t char_t = *(volatile uint8_t*)(0x10000000+0xFFFFFFC000000000);
       uint8_t char_addr[1] = {char_t};

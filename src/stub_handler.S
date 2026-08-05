@@ -67,7 +67,7 @@ user_proc_interrupt:
   csrw sscratch, x0
 
   # Enable Interrupts Safely
-  csrsi sstatus, 2
+  # csrsi sstatus, 2
 
   csrr a0, scause
   call handler_function

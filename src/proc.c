@@ -6,6 +6,7 @@
 #include "create_proc.h"
 #include "mem_cpy.h"
 #include "common.h"
+#include "elf_parse.h"
 
 extern void enter_proc(void* root_page_tab, trapframe_t* tf, void* prog_address_start, void* prog_address_end);
 
@@ -84,8 +85,15 @@ void init_proc(void* prog_address_start, void* prog_address_end, bool is_init){
 
 
   // We load the Program and Keep
-  size_t prog_size = (size_t)((uintptr_t)prog_address_end - (uintptr_t)prog_address_start);
-  mem_cpy((void*)0x1000,prog_address_start,prog_size);
+  Elf64_Ehdr* elf_file = (Elf64_Ehdr*)prog_address_start;
+  Elf64_Phdr* elf_phdr = (Elf64_Phdr*)((uintptr_t)elf_file + (uintptr_t)elf_file->e_phoff);
+  
+  for(uint8_t i = 0; i < elf_file->e_phnum; i++){
+    if(elf_phdr[i].p_type == 0x1){
+      void* current_addr = (void*)((uintptr_t)elf_file + (uintptr_t)elf_phdr[i].p_offset);
+      mem_cpy((void*)elf_phdr[i].p_vaddr,current_addr,(size_t)elf_phdr[i].p_filesz);
+    }
+  }
 
   if(is_init){
     flush_paging((uint64_t)pte_giga_entry);

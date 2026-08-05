@@ -47,8 +47,9 @@ void* page_alloc(uint64_t bytes){
   uint64_t k_occupied_bitmaps = k_occupied/64;
   uint64_t k_occupied_remainder = k_occupied % 64;
   uint64_t pages_req = bytes/4096;
+  if(bytes % 4096 != 0){
   pages_req += 1;
-
+  }
   // For Each uint64_t bitmap entry
   for(uint64_t i = k_occupied_bitmaps; i < _TOTAL_BITMAP_64; i++){
     uint64_t current_map = is_alloc_bitmap[i];
@@ -91,6 +92,9 @@ void* page_alloc(uint64_t bytes){
 
           // Calculate the proper index of the entry from the start by using the below Calculate
           void* return_addr = (void*)_RAM_START + (i*64 + j)*4096;
+          for(uint64_t k = 0; k < (pages_req)*512; k++){
+            ((uint64_t*)((uintptr_t)return_addr + (uintptr_t)0xFFFFFFC000000000ULL))[k] = 0x0;
+          }
           // return the address
           return return_addr;
         }
