@@ -103,7 +103,7 @@ void demand_paging(void* root_page_table, void* stval_reg){
         ((uint64_t*)((uintptr_t)new_table_entry + (uintptr_t)0xFFFFFFC000000000ULL))[j] = 0x0;
       }
       if(i < 2){
-        current_addr[page_frame_number] = ((uintptr_t)new_table_entry >> 2) | 0x0F;
+        current_addr[page_frame_number] = ((uintptr_t)new_table_entry >> 2) | 0x01;
         current_addr = (uint64_t*)((uintptr_t)new_table_entry + (uintptr_t)0xFFFFFFC000000000ULL);
       }
       else{
