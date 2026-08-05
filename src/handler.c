@@ -72,14 +72,25 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
     demand_paging(current_proc->root_page_table,stval_reg);
   }
   else {
+    uint64_t sstatus_reg;
     __asm__ __volatile__(
-      "csrr t0, sepc\n\t"
-      "sd t0, 232(%0)\n\t"
-      "csrsi sstatus, 2\n\t"
+      "csrr %0, sstatus"
+      :"=r"(sstatus_reg)
       :
-      :"r"(trapframe_reg)
-      :"t0","memory"
+      :
     );
+
+    if(sstatus_reg & 0x80 == 0x1){
+      __asm__ __volatile__(
+        "csrr t0, sepc\n\t"
+        "sd t0, 232(%0)\n\t"
+        "csrsi sstatus, 2\n\t"
+        :
+        :"r"(trapframe_reg)
+        :"t0","memory"
+      );
+    }
+
     uint32_t* write_ptr = (uint32_t*)((uintptr_t)PLIC_CLAIM_COMPLETE + 0xFFFFFFC000000000);
     uint32_t claim = *write_ptr;
     // Make sure to save the SEPC
