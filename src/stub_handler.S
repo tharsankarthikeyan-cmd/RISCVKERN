@@ -62,14 +62,14 @@ user_proc_interrupt:
   sd t0, 256(sp)
   
   # Store sscrtach
-  mv a3, sp 
+  mv a2, sp 
   # SET sscratch to zero for further Interrupts
   csrw sscratch, x0
 
   # Enable Interrupts Safely
   # csrsi sstatus, 2
 
-  csrr a0, scause
+  # csrr a0, scause
   call handler_function
 
   # Disable Interrupts Safely
@@ -167,7 +167,7 @@ kernel_interrupt:
   sd x31,  232(sp)
 
   # 3. Execute your high-level C/C++ trap handler
-  csrr a0, scause
+  # csrr a0, scause
   call handler_function
 
   # 4. Restore all 64-bit registers using 'ld' (Load Doubleword)

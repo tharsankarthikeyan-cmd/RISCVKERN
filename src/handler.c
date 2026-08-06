@@ -12,7 +12,14 @@ extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_start[];
 extern uint8_t user_prog_end[];
 
-void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uint64_t trapframe_reg){
+void handler_function(uint64_t prog_id, uint64_t value, uint64_t trapframe_reg){
+  uint64_t scause_reg;
+  __asm__ __volatile__(
+    "csrr %0, scause\n\t"
+    :"=r"(scause_reg)
+    :
+    :
+  );
   if(scause_reg == 8){
     
     // If the Exception is an ecall add 4 bytes to SEPC and then push tio 232(sp)
