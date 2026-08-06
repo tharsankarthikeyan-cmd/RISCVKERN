@@ -4,6 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void handler_function(uint64_t prog_id, uint64_t value, uint64_t trapframe_reg);
+void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg);
 
 #endif // !

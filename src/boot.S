@@ -101,7 +101,7 @@ early_kernel_main:
 .global user_prog_end_2
 
 user_prog_start:
-  .incbin "user_prog/user_prog.elf"
+  .incbin "user_prog/build/app.elf"
 user_prog_end:
   .incbin "user_prog/prog2.elf"
 user_prog_end_2:
