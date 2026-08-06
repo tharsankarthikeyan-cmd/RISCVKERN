@@ -11,6 +11,7 @@
 #include "mem_cpy.h"
 #include "timer.h"
 
+extern void* global_handler;
 extern void init_traps(void);
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_start[];
@@ -43,6 +44,13 @@ void kmain(void) {
   ((volatile uint8_t*)(0x10000000 + 0xFFFFFFC000000000))[1] = 0x01;
 
   // Try to init
+  __asm__ __volatile__(
+    "la t0, global_handler\n\t"
+    "csrw stvec, t0\n\t"
+    :
+    :
+    :"t0"
+  );
   init_proc((void*)user_prog_start,(void*)user_prog_end,true);
   init_proc((void*)user_prog_end,(void*)user_prog_end_2,false);
   //delete_page_tables((void*)((uintptr_t)end_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL));

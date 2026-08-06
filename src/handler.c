@@ -54,14 +54,23 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
   }
   else if(scause_reg == 13 || scause_reg == 12 || scause_reg == 15){
     // Make sure to save the SEPC
+    uint64_t sstatus_reg;
     __asm__ __volatile__(
-      "csrr t0, sepc\n\t"
-      "sd t0, 232(%0)\n\t"
-      "csrsi sstatus, 2\n\t"
+      "csrr %0, sstatus"
+      :"=r"(sstatus_reg)
       :
-      :"r"(trapframe_reg)
-      :"t0","memory"
+      :
     );
+    if(((sstatus_reg >> 7) & 0x1) == 0x1){
+      __asm__ __volatile__(
+        "csrr t0, sepc\n\t"
+        "sd t0, 232(%0)\n\t"
+        "csrsi sstatus, 2\n\t"
+        :
+        :"r"(trapframe_reg)
+        :"t0","memory"
+      );
+    }
     void* stval_reg;
     __asm__ __volatile__(
       "csrr %0, stval\n\t"
@@ -80,7 +89,7 @@ void handler_function(uint64_t scause_reg, uint64_t prog_id, uint64_t value, uin
       :
     );
 
-    if(sstatus_reg & 0x80 == 0x1){
+    if(((sstatus_reg >> 7) & 0x1) == 0x1){
       __asm__ __volatile__(
         "csrr t0, sepc\n\t"
         "sd t0, 232(%0)\n\t"
