@@ -8,3 +8,8 @@ sys_print:
   li a0, 0x2
   ecall
   ret
+
+sys_exit:
+  li a0, 0x0
+  ecall
+  ret

@@ -149,7 +149,17 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         while((void*)traverse->next != (void*)current_proc){
           traverse = traverse->next;
         }
+        if(current_proc == end_proc){
+          end_proc = traverse;
+        }
         traverse->next = current_proc->next;
+        //current_proc = current_proc->next;
+        current_proc = current_proc->next;
+        void* root_page_tab = current_proc->root_page_table;
+        trapframe_t* tf = current_proc->tf;
+        *write_ptr = claim;
+        enter_proc(root_page_tab, tf);
+        //enter_proc(current_proc->root_page_table, current_proc->tf);
       }
       else{
         ecall_print((uint8_t*)char_addr,1);
