@@ -161,6 +161,10 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         enter_proc(root_page_tab, tf);
         //enter_proc(current_proc->root_page_table, current_proc->tf);
       }
+      else if(char_addr[0] == '\r'){
+        ecall_print((uint8_t*)"\n",1);
+        ecall_print((uint8_t*)"> ",2);
+      }
       else{
         ecall_print((uint8_t*)char_addr,1);
       }
