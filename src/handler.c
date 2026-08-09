@@ -14,6 +14,7 @@ extern uint8_t user_prog_end_2[];
 
 uint8_t command_string[100];
 uint8_t command_string_index = 0;
+uint8_t current_char;
 
 void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg){
   uint64_t scause_reg;
@@ -97,6 +98,18 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       trapframe_t* tf = current_proc->tf;
       enter_proc(root_page_tab, tf);
     }
+    else if(ecall_id == 0x3){
+      // System Read the Interrupt
+      __asm__ __volatile__("wfi");
+      uint8_t send_char = current_char;
+      current_char = 0;
+      __asm__ __volatile__(
+        "sd %0, 56(%1)\n\t"
+        : 
+        :"r"(send_char), "r"(trapframe_reg)
+        : "memory"
+      );
+    }
   }
   else if((scause_reg & 0xF) == 5){
     ecall_timer_set();
@@ -173,11 +186,13 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         ecall_print((uint8_t*)char_addr,1);
         command_string[command_string_index] = char_addr[0];
         command_string_index++;
+        current_char = char_addr[0];
       }
       else if(char_addr[0] == 'k'){
         ecall_print((uint8_t*)char_addr,1);
         command_string[command_string_index] = char_addr[0];
         command_string_index++;
+        current_char = char_addr[0];
         void* current_proc_tables = (void*)((uintptr_t)current_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL);
         delete_page_tables(current_proc_tables);
         Proc* traverse = current_proc;
@@ -202,11 +217,13 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         ecall_print((uint8_t*)"\n",1);
         ecall_print((uint8_t*)"> ",2);
         command_string_index = 0;
+        current_char = '\r';
       }
       else{
         ecall_print((uint8_t*)char_addr,1);
         command_string[command_string_index] = char_addr[0];
         command_string_index++;
+        current_char = char_addr[0];
       }
       //*(volatile uint8_t*)(0x10000000) = char_t;
     }

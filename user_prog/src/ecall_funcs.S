@@ -1,5 +1,6 @@
 .global sys_print
 .global sys_exit
+.global sys_read
 
 sys_print:
   mv a4, a3
@@ -12,5 +13,10 @@ sys_print:
 
 sys_exit:
   li a0, 0x0
+  ecall
+  ret
+
+sys_read:
+  li a0, 0x3
   ecall
   ret
