@@ -12,6 +12,9 @@ extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_end[];
 extern uint8_t user_prog_end_2[];
 
+uint8_t command_string[100];
+uint8_t command_string_index = 0;
+
 void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg){
   uint64_t scause_reg;
   __asm__ __volatile__(
@@ -141,8 +144,14 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       uint8_t char_addr[1] = {char_t};
       if(char_addr[0] == 'X' || char_addr[0] == 'x'){
         init_proc(user_prog_end,user_prog_end_2,false);
+        ecall_print((uint8_t*)char_addr,1);
+        command_string[command_string_index] = char_addr[0];
+        command_string_index++;
       }
       else if(char_addr[0] == 'k'){
+        ecall_print((uint8_t*)char_addr,1);
+        command_string[command_string_index] = char_addr[0];
+        command_string_index++;
         void* current_proc_tables = (void*)((uintptr_t)current_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL);
         delete_page_tables(current_proc_tables);
         Proc* traverse = current_proc;
@@ -163,10 +172,15 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       }
       else if(char_addr[0] == '\r'){
         ecall_print((uint8_t*)"\n",1);
+        ecall_print((uint8_t*)command_string,command_string_index);
+        ecall_print((uint8_t*)"\n",1);
         ecall_print((uint8_t*)"> ",2);
+        command_string_index = 0;
       }
       else{
         ecall_print((uint8_t*)char_addr,1);
+        command_string[command_string_index] = char_addr[0];
+        command_string_index++;
       }
       //*(volatile uint8_t*)(0x10000000) = char_t;
     }
