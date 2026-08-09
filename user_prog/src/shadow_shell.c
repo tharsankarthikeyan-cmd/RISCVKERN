@@ -2,6 +2,7 @@
 #include <stddef.h>
 
 extern void sys_print(uint64_t x_coor, uint64_t y_coor, uint8_t* string_ptr, uint64_t length);
+extern void sys_exit(void);
 
 void _start(){
   sys_print(1,0,(uint8_t*)" ____  _               _                ____  _          _ _  ",61);

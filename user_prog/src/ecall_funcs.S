@@ -1,4 +1,5 @@
 .global sys_print
+.global sys_exit
 
 sys_print:
   mv a4, a3

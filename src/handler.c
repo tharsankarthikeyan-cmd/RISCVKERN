@@ -79,6 +79,24 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       //ecall_print((uint8_t*)string_ptr,length);
       ecall_print(&end_of_line,1);
     }
+    else if(ecall_id == 0x0){
+      // Kill Process
+      void* current_proc_tables = (void*)((uintptr_t)current_proc->root_page_table - (uintptr_t)0xFFFFFFC000000000ULL);
+      delete_page_tables(current_proc_tables);
+      Proc* traverse = current_proc;
+      while((void*)traverse->next != (void*)current_proc){
+        traverse = traverse->next;
+      }
+      if(current_proc == end_proc){
+        end_proc = traverse;
+      }
+      traverse->next = current_proc->next;
+      //current_proc = current_proc->next;
+      current_proc = current_proc->next;
+      void* root_page_tab = current_proc->root_page_table;
+      trapframe_t* tf = current_proc->tf;
+      enter_proc(root_page_tab, tf);
+    }
   }
   else if((scause_reg & 0xF) == 5){
     ecall_timer_set();
@@ -114,7 +132,15 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       :
       :
     );
-    demand_paging(current_proc->root_page_table,stval_reg);
+    uintptr_t root_page_table;
+    __asm__ __volatile__(
+      "csrr %0, satp\n\t"
+      :"=r"(root_page_table)
+      :
+      :
+    );
+    root_page_table = ((root_page_table & 0xFFFFFFFFFFF) << 12) + (uintptr_t)0xFFFFFFC000000000ULL;  
+    demand_paging((void*)root_page_table,stval_reg);
   }
   else {
     uint64_t sstatus_reg;
