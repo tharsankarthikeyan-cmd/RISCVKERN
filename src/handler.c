@@ -289,6 +289,9 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         }
         traverse->next = current_proc->next;
         current_proc = current_proc->next;
+        while(current_proc->proc_state != 0x1){
+          current_proc = current_proc->next;
+        }
         void* root_page_tab = current_proc->root_page_table;
         trapframe_t* tf = current_proc->tf;
         *write_ptr = claim;
