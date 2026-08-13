@@ -137,25 +137,17 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
 
     // ECALL INTERFACE: ECALL_ID = 0x3: Right now ignore this
     else if(ecall_id == 0x3){
-      // Read Inputs from the Argument Register from trapframe_reg
-      uint8_t* text_buffer;
-      uint64_t text_buf_index = 0;
-      __asm__ __volatile__(
-        "ld %0, 64(%1)\n\t" // Read Regitser a1 for text buffer
-        :"=r"(text_buffer)
-        :"r"(trapframe_reg)
-        :
-      );
-      current_char = 0; // Set the current char to null
-      while(current_char != '\r'){
-        __asm__ __volatile__("wfi");
-        if(current_char != 0){
-          text_buffer[text_buf_index] = current_char;
-          text_buf_index++;
-          current_char = 0;
-        }
+      current_proc->proc_state = false;
+      current_proc = current_proc->next;
+      while(current_proc->proc_state != 0x1){
+        current_proc = current_proc->next;
       }
-      text_buffer[text_buf_index] = '\0';
+      // Gather the root_page_table and trapframe
+      void* root_page_tab = current_proc->root_page_table;
+      trapframe_t* tf = current_proc->tf;
+
+      // Enter the process if and only if the current_proc states that the state is ACTIVE
+      enter_proc(root_page_tab, tf);
     }
   }
 
@@ -163,6 +155,14 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
   else if((scause_reg & 0xF) == 5){
     // Set the ecall timer one second in the future
     ecall_timer_set();
+
+    // Enable Other Interrupts
+    __asm__ __volatile__(
+      "csrsi sstatus, 2\n\t"
+      :
+      :
+      :
+    );
 
     // Move the current_proc pointer to the next process of the current_proc
     current_proc = current_proc->next;

@@ -16,6 +16,7 @@ void _start(){
   sys_print(6,0,(uint8_t*)"> ",2);
   uint8_t text_buffer[100];
   uint64_t text_buf_index = 0;
+  sys_read(text_buffer);
   sys_print(50,50,(uint8_t*)text_buffer,text_buf_index);
   while(1);
 }
