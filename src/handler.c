@@ -166,15 +166,16 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
 
     // Move the current_proc pointer to the next process of the current_proc
     current_proc = current_proc->next;
+    while(current_proc->proc_state != 0x1){
+      current_proc = current_proc->next;
+    }
 
     // Gather the root_page_table and trapframe
     void* root_page_tab = current_proc->root_page_table;
     trapframe_t* tf = current_proc->tf;
 
     // Enter the process if and only if the current_proc states that the state is ACTIVE
-    if(current_proc->proc_state){
-      enter_proc(root_page_tab, tf);
-    }
+    enter_proc(root_page_tab, tf);
   }
 
   // When Page Fault/Load Store Fault hits
