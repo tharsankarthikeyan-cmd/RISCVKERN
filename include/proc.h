@@ -2,6 +2,7 @@
 #define PROC_H
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef struct trapframe_t{
   uint64_t temp_reg[7];
@@ -20,6 +21,7 @@ typedef struct Proc{
   void* root_page_table;
   trapframe_t* tf;
   struct Proc* next;
+  bool proc_state;
 }__attribute__((packed)) Proc;
 
 extern Proc init1;

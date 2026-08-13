@@ -63,6 +63,7 @@ void init_proc(void* prog_address_start, void* prog_address_end, bool is_init){
   process->root_page_table = init_root_page_table;
   process->tf = init_trap_frame;
   process->next = (Proc*)(end_proc->next);
+  process->proc_state = true;
   end_proc->next = (Proc*)process;
   end_proc = (Proc*)process;
 
