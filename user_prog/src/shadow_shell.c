@@ -17,7 +17,7 @@ void _start(){
   uint8_t text_buffer[100];
   uint64_t text_buf_index = 0;
   sys_read(text_buffer);
-  sys_print(50,50,(uint8_t*)"El Psy Kongroo",14);
+  sys_print(50,50,text_buffer,10);
   while(1);
 }
 

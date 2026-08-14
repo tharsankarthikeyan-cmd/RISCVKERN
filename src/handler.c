@@ -8,12 +8,15 @@
 #include "common.h"
 #include "timer.h"
 #include "str_cmp.h"
+#include "mem_cpy.h"
 
 extern void enter_proc(void* root_page_tab, trapframe_t* tf);
 extern uint8_t user_prog_end[];
 extern uint8_t user_prog_end_2[];
 
 uint8_t current_char;
+uint8_t text_buffer[100];
+uint64_t text_buf_index = 0;
 
 // Head Handler Function for All Types of Interrupts
 void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg){
@@ -303,12 +306,26 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       else if(char_addr[0] == '\r'){
         ecall_print((uint8_t*)"\n",1);
         ecall_print((uint8_t*)"> ",2);
+        ecall_print((uint8_t*)text_buffer,text_buf_index);
         current_char = '\r';
-        Proc* traverse = current_proc->next;
-        while(traverse != current_proc){
-          traverse->proc_state = 0x1;
-          traverse = traverse->next;
+        Proc* traverse = current_proc;
+        while(traverse->next != current_proc || traverse->next == current_proc){
+          if(traverse->proc_state == 0x0){
+            flush_paging((uint64_t)traverse->root_page_table);
+            // Gather the destination from the trapframe via a1 register
+            trapframe_t* traverse_trapframe = traverse->tf;
+            mem_cpy((uint8_t*)traverse_trapframe->func_args[1],(uint8_t*)text_buffer,(size_t)text_buf_index);
+            traverse->proc_state = 0x1;
+            flush_paging((uint64_t)current_proc->root_page_table);
+          }
+          if(traverse->next == current_proc){
+            break;
+          }
+          else{
+            traverse = traverse->next;
+          }
         }
+        text_buf_index = 0;
       }
       
       // Else if it is just a simple key just print it to the screen
@@ -316,6 +333,9 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         ecall_print((uint8_t*)char_addr,1);
         current_char = char_addr[0];
       }
+      
+      text_buffer[text_buf_index] = char_addr[0];
+      text_buf_index++;
 
     }
     *write_ptr = claim;
