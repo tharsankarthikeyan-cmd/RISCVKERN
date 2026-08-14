@@ -304,6 +304,11 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         ecall_print((uint8_t*)"\n",1);
         ecall_print((uint8_t*)"> ",2);
         current_char = '\r';
+        Proc* traverse = current_proc->next;
+        while(traverse != current_proc){
+          traverse->proc_state = 0x1;
+          traverse = traverse->next;
+        }
       }
       
       // Else if it is just a simple key just print it to the screen
