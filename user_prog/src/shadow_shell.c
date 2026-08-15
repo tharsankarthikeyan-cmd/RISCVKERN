@@ -16,8 +16,14 @@ void _start(){
   sys_print(6,0,(uint8_t*)"> ",2);
   uint8_t text_buffer[100];
   uint64_t text_buf_index = 0;
-  sys_read(text_buffer);
-  sys_print(50,50,text_buffer,10);
+  while(1){
+    sys_read(text_buffer);
+    while(text_buffer[text_buf_index] != 0x0){
+      text_buf_index++;
+    }
+    sys_print(10,10,text_buffer,text_buf_index);
+    text_buf_index = 0;
+  }
   while(1);
 }
 

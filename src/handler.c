@@ -308,6 +308,8 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         ecall_print((uint8_t*)"> ",2);
         ecall_print((uint8_t*)text_buffer,text_buf_index);
         current_char = '\r';
+        // Add End of string character
+        text_buffer[text_buf_index] = '\0';
         Proc* traverse = current_proc;
         while(traverse->next != current_proc || traverse->next == current_proc){
           if(traverse->proc_state == 0x0){
@@ -332,10 +334,10 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       else{
         ecall_print((uint8_t*)char_addr,1);
         current_char = char_addr[0];
+        text_buffer[text_buf_index] = char_addr[0];
+        text_buf_index++;
       }
       
-      text_buffer[text_buf_index] = char_addr[0];
-      text_buf_index++;
 
     }
     *write_ptr = claim;
