@@ -21,7 +21,7 @@ void _start(){
     while(text_buffer[text_buf_index] != 0x0){
       text_buf_index++;
     }
-    sys_print(10,10,text_buffer,text_buf_index);
+    sys_print(0,0,text_buffer,text_buf_index);
     text_buf_index = 0;
   }
   while(1);

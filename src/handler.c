@@ -69,6 +69,7 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
     else if(ecall_id == 0x2){
       // This is the string which handles the position of the print string in the screen
       uint8_t print_string[] = "\033[  ;  H";
+      uint8_t no_format_string[] = "";
       uint64_t x_coor;
       uint64_t y_coor;
       uint8_t* string_ptr;
@@ -85,16 +86,22 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         :"r"(trapframe_reg)
         :
       );
-      uart_int(x_coor,&print_string[2],2);
-      uart_int(y_coor,&print_string[5],2);
-      ecall_print((uint8_t*)print_string,8);
-      for(uint64_t i = 0; i < length; i++){
-        print_string[8+i] = string_ptr[i];
+      if(x_coor == 0 && y_coor == 0){
+        for(uint64_t i = 0; i < length; i++){
+          no_format_string[i] = string_ptr[i];
+        }
+        ecall_print((uint8_t*)no_format_string,length);
       }
+      else{
+        uart_int(x_coor,&print_string[2],2);
+        uart_int(y_coor,&print_string[5],2);
+        for(uint64_t i = 0; i < length; i++){
+          print_string[8+i] = string_ptr[i];
+        }
 
-      // Printing the Formatted Print String
-      ecall_print((uint8_t*)print_string,8+length);
-
+        // Printing the Formatted Print String
+        ecall_print((uint8_t*)print_string,8+length);
+      }
       // This section is specfically for end of line character
       uint8_t end_of_line = '\n';
       ecall_print(&end_of_line,1);
@@ -306,17 +313,17 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       else if(char_addr[0] == '\r'){
         ecall_print((uint8_t*)"\n",1);
         ecall_print((uint8_t*)"> ",2);
-        ecall_print((uint8_t*)text_buffer,text_buf_index);
+        //ecall_print((uint8_t*)text_buffer,text_buf_index);
         current_char = '\r';
         // Add End of string character
-        text_buffer[text_buf_index] = '\0';
+        text_buffer[text_buf_index] = 0x0;
         Proc* traverse = current_proc;
         while(traverse->next != current_proc || traverse->next == current_proc){
           if(traverse->proc_state == 0x0){
             flush_paging((uint64_t)traverse->root_page_table);
             // Gather the destination from the trapframe via a1 register
             trapframe_t* traverse_trapframe = traverse->tf;
-            mem_cpy((uint8_t*)traverse_trapframe->func_args[1],(uint8_t*)text_buffer,(size_t)text_buf_index);
+            mem_cpy((uint8_t*)traverse_trapframe->func_args[1],(uint8_t*)text_buffer,((size_t)text_buf_index+1));
             traverse->proc_state = 0x1;
             flush_paging((uint64_t)current_proc->root_page_table);
           }
