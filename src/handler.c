@@ -159,6 +159,11 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       // Enter the process if and only if the current_proc states that the state is ACTIVE
       enter_proc(root_page_tab, tf);
     }
+
+    // ECALL_ID = 0x1, sys_create_proc: Creates a new process using init_proc, Test Phase 1: A simple counter process
+    else if(ecall_id == 0x1){
+      init_proc(user_prog_end,user_prog_end_2,false);
+    }
   }
 
   // When a Timer Interrupts Hits
