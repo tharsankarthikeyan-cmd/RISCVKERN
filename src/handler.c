@@ -142,7 +142,10 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
       trapframe_t* tf = current_proc->tf;
 
       // Enter the current proc using the root_page_table and trapframe
-      enter_proc(root_page_tab, tf);
+      while(current_proc->proc_state != 0x0){
+        current_proc = current_proc->next;
+        enter_proc(root_page_tab, tf);
+      }
     }
 
     // ECALL INTERFACE: ECALL_ID = 0x3: Right now ignore this
