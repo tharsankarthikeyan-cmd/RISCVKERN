@@ -15,12 +15,12 @@ TARGET_BIN := build/app.bin
 
 # --- Source and Object File Discovery ---
 # Looks inside the new src/ directory for your files
-C_SRCS   := $(wildcard src/*.c)
-ASM_SRCS := $(wildcard src/*.S)
+C_SRCS   := $(wildcard *.c)
+ASM_SRCS := $(wildcard *.S)
 
 # Map source files to their object file targets inside build/
-OBJS     := $(patsubst src/%.c, build/%.o, $(C_SRCS)) \
-            $(patsubst src/%.S, build/%.o, $(ASM_SRCS))
+OBJS     := $(patsubst %.c, build/%.o, $(C_SRCS)) \
+            $(patsubst %.S, build/%.o, $(ASM_SRCS))
 
 # --- Build Rules ---
 
@@ -33,12 +33,12 @@ $(TARGET_ELF): $(OBJS) linker.ld
 	$(LD) $(LDFLAGS) $(OBJS) -o $(TARGET_ELF)
 
 # Pattern rule for compiling C source files into Object files
-build/%.o: src/%.c
+build/%.o: %.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $< -o $@
 
 # Pattern rule for assembling .S assembly files into Object files
-build/%.o: src/%.S
+build/%.o: %.S
 	@mkdir -p build
 	$(AS) $(ASFLAGS) $< -o $@
 
