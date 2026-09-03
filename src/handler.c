@@ -45,16 +45,16 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
     );
 
     // This is Just a test for 0xdeadbeef
-    if(ecall_id == 0xdeadbeef){
-      uint8_t process_string[17] = "\033[ ; HProcess  : ";
-      ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);
-      uint8_t count[6] = {'0','0','0','0','0','\r'};
-      uart_int(value,count,5);
-      ecall_print((uint8_t*)count,5);
-    }
+    //if(ecall_id == 0xdeadbeef){
+      //uint8_t process_string[17] = "\033[ ; HProcess  : ";
+      //ecall_print((uint8_t*)"\033[0;0HProcess 1: ", 17);
+      //uint8_t count[6] = {'0','0','0','0','0','\r'};
+      //uart_int(value,count,5);
+      //ecall_print((uint8_t*)count,5);
+    //}
 
     // Again This is just a test
-    else if(ecall_id == 0xdeadc0de){
+    if(ecall_id == 0xdeadc0de){
       uint8_t process_string[17] = "\033[ ; HProcess  : ";
       process_string[2] = '0' + 2*(current_proc->pid);
       process_string[4] = '0';
@@ -68,8 +68,8 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
     // ECALL INTERFACE ECALL_ID = 0x2: sys_print(x,y,string_ptr,length)
     else if(ecall_id == 0x2){
       // This is the string which handles the position of the print string in the screen
-      uint8_t print_string[] = "\033[  ;  H";
-      uint8_t no_format_string[] = "";
+      //uint8_t print_string[] = "\033[  ;  H";
+      //uint8_t no_format_string[] = "";
       uint64_t x_coor;
       uint64_t y_coor;
       uint8_t* string_ptr;
@@ -86,6 +86,12 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         :"r"(trapframe_reg)
         :
       );
+      uint8_t format_str[9] = "\033[  ;  H";
+      uint8_t print_string[9+length];
+      uint8_t no_format_string[length];
+      for(uint64_t i = 0; i < 9; i++){
+        print_string[i] = format_str[i];
+      }
       if(x_coor == 0 && y_coor == 0){
         for(uint64_t i = 0; i < length; i++){
           no_format_string[i] = string_ptr[i];
@@ -96,11 +102,11 @@ void handler_function(uint64_t ecall_id, uint64_t value, uint64_t trapframe_reg)
         uart_int(x_coor,&print_string[2],2);
         uart_int(y_coor,&print_string[5],2);
         for(uint64_t i = 0; i < length; i++){
-          print_string[8+i] = string_ptr[i];
+          print_string[9+i] = string_ptr[i];
         }
 
         // Printing the Formatted Print String
-        ecall_print((uint8_t*)print_string,8+length);
+        ecall_print((uint8_t*)print_string,9+length);
       }
       // This section is specfically for end of line character
       uint8_t end_of_line = '\n';
